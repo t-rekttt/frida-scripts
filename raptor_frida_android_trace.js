@@ -43,8 +43,7 @@ function trace(pattern)
 			onMatch: function(aClass) {
 				if (aClass.match(pattern)) {
 					found = true;
-					var className = aClass.match(/[L](.*);/)[1].replace(/\//g, ".");
-					traceClass(className);
+					traceClass(aClass);
 				}
 			},
 			onComplete: function() {}
@@ -90,7 +89,7 @@ function traceMethod(targetClassMethod)
 	var targetMethod = targetClassMethod.slice(delim + 1, targetClassMethod.length)
 
 	var hook = Java.use(targetClass);
-	var overloadCount = hook[targetMethod].overloads.length;
+	var overloadCount = hook[targetMethod]?.overloads?.length || 0;
 
 	console.log("Tracing " + targetClassMethod + " [" + overloadCount + " overload(s)]");
 
@@ -101,19 +100,19 @@ function traceMethod(targetClassMethod)
 
 			// print backtrace
 			// Java.perform(function() {
-			//	var bt = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Exception").$new());
-			//	console.log("\nBacktrace:\n" + bt);
+			// 	var bt = Java.use("android.util.Log").getStackTraceString(Java.use("java.lang.Exception").$new());
+			// 	console.log("\nBacktrace:\n" + bt);
 			// });   
 
 			// print args
 			if (arguments.length) console.log();
 			for (var j = 0; j < arguments.length; j++) {
-				console.log("arg[" + j + "]: " + arguments[j]);
+				console.log("arg[" + j + "]: " + JSON.stringify(arguments[j]));
 			}
 
 			// print retval
 			var retval = this[targetMethod].apply(this, arguments); // rare crash (Frida bug?)
-			console.log("\nretval: " + retval);
+			console.log("\nretval: " + JSON.stringify(retval));
 			console.warn("\n*** exiting " + targetClassMethod);
 			return retval;
 		}
